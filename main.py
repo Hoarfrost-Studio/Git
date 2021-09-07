@@ -2,6 +2,10 @@
 #调用库函数
 import numpy as np
 
+#调用Excel读写库
+import xlwt
+import xlrd
+
 # 循环移位函数
 def move(ls: list, offset):
     """
@@ -20,7 +24,7 @@ def move(ls: list, offset):
 
 #定义全局变量
 global b
-global c
+global i
 #
 tries = 1
 #a = 1
@@ -55,12 +59,54 @@ while b != locals()['b'+str(i-1)]:
 else:
     for j in range(1,i):
        locals()['arr'+str(j)] = np.array(locals()['b'+str(j)])
-       print(locals()['arr'+str(j)])
+       #print(locals()['arr'+str(j)])
 
 #矩阵的合并
-#for d in range(1,i):
-    
+for d in range(2,i):
+    locals()['arr'+str(d)] = np.vstack((locals()['arr'+str(d-1)],locals()['arr'+str(d)]))
+    #print(locals()['arr'+str(d)])
+
+#将矩阵逆时针旋转90°一次
+matrix = np.rot90(locals()['arr'+str(j)],1)
+print(matrix)
 
 
 #取出a(x,y)绘制表格
 
+
+#矩阵写入excel
+
+
+#创建一个样式
+# 初始化一个style式样
+style = xlwt.XFStyle()
+
+
+#设置单元格格式
+pattern = xlwt.Pattern()
+pattern.pattern = xlwt.Pattern.SOLID_PATTERN
+
+pattern.pattern_fore_colour = 0
+
+#给 style 设置上pattern
+style.pattern = pattern
+
+
+# c.astype(np.float64)
+filename = xlwt.Workbook()#创建工作簿
+sheet1 = filename.add_sheet(u'sheet1',cell_overwrite_ok = True)#创建sheet
+
+[h,l]=matrix.shape#h为行数,l为列数
+for i in range(h):
+    for j in range(l):
+#列宽    
+        first_col=sheet1.col(i)
+        first_col.width=256*4
+#行高
+        tall_style = xlwt.easyxf('font:height 320;') # 36pt,类型小初的字号
+        first_row = sheet1.row(j) 
+        first_row.set_style(tall_style)
+#填色        
+        if int(matrix[i,j]) > 0:
+            sheet1.write(i,j,int(matrix[i,j]),style)
+filename.save('表格1.xls')
